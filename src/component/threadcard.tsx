@@ -1,33 +1,48 @@
 import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export default function ThreadCard({ thread }: any) {
-   const [liked, setliked] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   return (
-    <div className="border border-gray-800 p-4 rounded-xl">
-      <div className="flex gap-3">
-        
-        <img
-          src={thread.user.avatar}
-          className="w-10 h-10 rounded-full"
-        />
+    <Card className="bg-black border-gray-800 text-white">
+      <CardContent className="p-4">
+        <div className="flex gap-3">
+          
+          <Avatar>
+            <AvatarImage src="/src/assets/img/alya.jpg"/>
+          </Avatar>
 
-        <div>
-          <div className="flex gap-2">
-            <p className="font-semibold">{thread.user.name}</p>
-            <p className="text-gray-400 text-sm">
-              {thread.user.username}
+          <div className="flex-1">
+            <div className="flex gap-2 items-center">
+              <p className="font-semibold text-white">
+                {thread.user.name}
+              </p>
+              <p className="text-gray-400 text-sm">
+                @{thread.user.username}
+              </p>
+            </div>
+
+            <p className="text-sm mt-1 text-gray-200">
+              {thread.content}
             </p>
+
+            <div className="flex gap-4 mt-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-300"
+                onClick={() => setLiked(!liked)}
+              >
+                {liked ? "❤️ Liked" : "🤍 Like"}
+              </Button>
+            </div>
           </div>
 
-          <p className="text-sm mt-1">{thread.content}</p>
-
-          <div className="flex gap-4 text-gray-400 text-sm mt-3">
-            <button onClick={() => setliked (!liked)}>{liked? "❤️ liked" : "🤍 like"}</button>
-          </div>
         </div>
-
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
