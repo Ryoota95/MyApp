@@ -1,36 +1,68 @@
 import {Request, Response} from "express";
 import prisma from "../lib/prisma";
+import {io} from "../app"
+import { imageQueue } from "../queues/image.queue";
 
 
-export const getThreads = async (req: Request, res: Response) => {
-  const threads = await prisma.thread.findMany({
+
+export const createThread = async (req: any, res: any) => {
+  const { content} = req.body;
+  const image = req.file;
+
+  console.log("file", req.file);
+  
+  console.log("user", req.user);
+  
+
+  const threads = await prisma.thread.create({
+    data: {
+      content,
+      image: image ? image.filename : null,
+      userId: req.user.id,
+    },
     include: {
       user: true,
-        likes: true,
-        replys: true,
-    },
-    orderBy: {
-      createdAt: "desc"
+      likes: true
     }
   });
 
+  io.emit("thread:new", threads)
 
-if (threads.length === 0) {
-    return res.json([
-        {
-            id: 1,
-            content: "Thread pertama",
-            image: null,
-            likes: 1000,
-            replys: [],
-            user: {
-                id: 1,
-                name: "Rizqy aliyah",
-                username: "alya",
-                email: "ray@gmail.com"
-            }
-        }
-    ])
-}
- res.json(threads);
-}
+  await imageQueue.add("processing-image", {
+    threadId: threads.id,
+    image: threads.image,
+  });
+
+  console.log("queue added");
+  
+  
+  
+  res.json(threads);
+};
+
+export const getThread = async (req: any, res: any) => {
+  const userId = req.user.id;
+
+  const threads = await prisma.thread.findMany({
+    orderBy: {
+      createdAt: "desc"
+    },
+    include: {
+      user: true,
+      likes: true,
+      _count: {
+        select: {replys: true}
+      }
+    }
+  }) as any[];
+
+ const threadswithisliked = threads.map((thread) => {
+  const likes = (thread as any).likes ?? [];
+  return {
+    ...thread,
+    isliked: likes.some((like: any) => like.userId === userId),
+  };
+});
+
+  res.json(threadswithisliked);
+};

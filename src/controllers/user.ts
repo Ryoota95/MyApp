@@ -7,7 +7,7 @@ declare module "express"{
     }
 }
 
-export const getprofile = async (req: Request, res: Response) => {
+export const getUser = async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user?.id },
@@ -20,3 +20,37 @@ export const getprofile = async (req: Request, res: Response) => {
   }
 
 }
+
+
+export const searchUsers = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.query;
+
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: search as string,
+          mode: "insensitive",
+        },
+        NOT: {
+          id: req.user.id
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+    
+      },
+    });
+
+    res.json({
+      status: "success",
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed search user",
+    });
+  }
+};
