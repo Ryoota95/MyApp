@@ -29,7 +29,7 @@ export default function Login() {
 
     if (res.ok) {
       dispatch(setCredentials({ user: data.user, token: data.token }));
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.token);
       navigate("/dashboard");
     } else {
       alert(data.message);
@@ -37,7 +37,7 @@ export default function Login() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       navigate("/dashboard");
     }
@@ -46,8 +46,8 @@ export default function Login() {
   return (
   <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-4">
     <div className="w-full max-w-sm">
-      <p className="text-green-500 text-2xl font-medium mb-1">Null</p>
-      <p className="text-white text-xl font-medium mb-6">Login to Null</p>
+      <p className="text-green-500 text-2xl font-medium mb-1">Circle</p>
+      <p className="text-white text-xl font-medium mb-6">Login to Circle</p>
 
       <form onSubmit={handleLogin} className="flex flex-col gap-3">
         <input
@@ -64,9 +64,7 @@ export default function Login() {
           className="bg-[#2a2a2a] border border-[#3a3a3a] rounded-md px-4 py-2.5 text-white text-sm placeholder-gray-500 outline-none focus:border-green-500"
         />
 
-        <div className="text-right -mt-1">
-          <a href="#" className="text-xs text-gray-500 hover:text-gray-300">Forgot password?</a>
-        </div>
+        
 
         <button
           type="submit"
