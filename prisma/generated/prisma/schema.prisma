@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  password     String
+  photoProfile String?
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  threads Thread[]
+  replys  Reply[]
+  likes   Like[]
+
+  following following[] @relation("Following")
+  followers following[] @relation("Followers")
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  content   String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  replys Reply[]
+  likes  Like[]
+}
+
+model Reply {
+  id        Int      @id @default(autoincrement())
+  content   String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  threadId Int
+  thread   Thread @relation(fields: [threadId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  threadId Int
+  thread   Thread? @relation(fields: [threadId], references: [id])
+
+  @@unique([userId, threadId])
+}
+
+model following {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  followerId Int
+  follower   User @relation("Followers", fields: [followerId], references: [id])
+
+  followingId Int
+  following   User @relation("Following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
